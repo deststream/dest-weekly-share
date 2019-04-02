@@ -89,38 +89,6 @@ dumpsys window windows | grep -i current
 |0x4002 | 0x34 | 0x56 |
 |0x4003 | 0x12 | 0x78 |
 
-#### 数组在大端小端情况下的存储
-
-以unsigned int value = 0x12345678为例，分别看看在两种字节序下其存储情况，我们可以用unsigned char buf[4]来表示value：
-
-Big-Endian: 低地址存放高位，如下：
-
-[高地址]
-
-buf[3] (0x78) -- 低位
-
-buf[2] (0x56)
-
-buf[1] (0x34)
-
-buf[0] (0x12) -- 高位
-
-[低地址]
-
-Little-Endian: 低地址存放低位，如下：
-
-[高地址]
-
-buf[3] (0x12) -- 高位
-
-buf[2] (0x34)
-
-buf[1] (0x56)
-
-buf[0] (0x78) -- 低位
-
-[低地址]
-
 
 #### 优劣势
 
