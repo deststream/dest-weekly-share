@@ -1,4 +1,4 @@
-# 知识共享第1期
+﻿# 知识共享第1期
 
 ## 一、Android下的MonkeyTest
 
@@ -126,3 +126,81 @@ for (int i = 0; i < code.length; i += 4) {
 
 
 [https://blog.csdn.net/ce123_zhouwei/article/details/6971544](https://blog.csdn.net/ce123_zhouwei/article/details/6971544)
+
+## 三、Java多线程程序设计
+
+### 1、多线程简单概念
+
+>首先，分为基于进程的多任务与基于线程的多任务。其实不用过多纠结两者的区别，无非就是进程与线程的区别（具体可百度进程与线程的差异）。多线程主要是使系统处理器提高效率的一种手段，同时防止了阻塞，在程序运行中起了很大作用。比如我们的智慧宿管项目中，在网络请求异步的操作中，就应用了多线程的手段。
+
+### 2、简单了解线程创建
+#### Thread类与Runnable接口
+两句话表达他们之间的关系：
+①、Java中真正能创建新线程的只有Thread类对象
+②、通过实现Runnable的方式，最终还是通过Thread类对象来创建线程
+
+```
+// 步骤1：创建线程辅助类，实现Runnable接口
+ class MyThread implements Runnable{
+    ....
+// 步骤2：复写run（），定义线程行为
+    @Override
+    public void run(){
+
+    }
+}
+
+// 步骤3：创建线程辅助对象，即 实例化 线程辅助类
+  MyThread mt=new MyThread();
+
+// 步骤4：创建线程对象，即 实例化线程类；线程类 = Thread类；
+// 创建时通过Thread类的构造函数传入线程辅助类对象
+// 原因：Runnable接口并没有任何对线程的支持，我们必须创建线程类（Thread类）的实例，从Thread类的一个实例内部运行
+  Thread td=new Thread(mt);
+
+// 步骤5：通过 线程对象 控制线程的状态，如 运行、睡眠、挂起  / 停止
+// 当调用start（）方法时，线程对象会自动回调线程辅助类对象的run（），从而实现线程操作
+  td.start();
+```
+#### 补充：对于MyThread类的改进
+```
+//此处在内部定义了Thread类的thread对象，并用工厂方法createAndStart创建并执行实例化对象，为程序提供了方便
+class MyThread implements Runnable{
+Thread thread；
+
+MyThread(String name){
+thread = new Thread(this,name);
+}
+
+public static MyThread createAndStart(String name){
+Mythread mythread = new MyThread(name);
+mythread.thread.start();
+return mythread;
+}
+
+@Override
+public void run(){
+
+ }
+```
+### 3、确定线程何时结束
+
+>  Thread提供了两种方法，一种为isAlive()，这个简单粗暴，可以通过返回值来判断是否结束。
+第二种为join()方法，顾名思义，join方法意思是等待（它调用的线程）加入它，直到（它调用的线程)终止时，才会执行join方法以后的代码。
+
+### 4、关于线程的优先级
+
+>首先明确一个概念，将低优先级赋予另一个线程并不一定意味着前一个线程就会比后一个线程运行得快或者获得的运行时间更多。高优先级的线程仅具有占用更多CPU时间的可能。
+设置优先级的方法  final void setPriority(int level);  level一共有1-10个值，可用MIN_PRIORITY到MAX_PRIORITY之间来表示。
+
+### 5、同步
+>  同步是多线程操作的一个很重要的概念。同步是使线程协调工作的一个过程，，通过“锁”的概念来实现对对象或方法的一个唯一访问，防止资源的错乱。
+常用的方法一：使用synchronized关键字修饰需要同步的方法。注：该方法在同一个对象内，只能同时被一个操作调用。
+常用的方法二：使用synchronized代码块的形式控制。形如：
+```
+synchronized(object o){
+//对象o的方法描述
+}
+```
+#### 在同步之中，对资源利用率的提高。
+>  通常情况下，每个线程使用的资源不止一个，而当一个线程在使用资源A时，又需要使用资源B。然而资源B正在被其他线程使用，并且使用了synchronized来控制资源B的占用。这时，该线程只能无限等待资源B被解放，才能够运行下去。然而这会使资源A被一直占用而无法释放，大大降低了资源的利用率。这时，我们需要使用notify(),wait(),notifyAll() 方法。在线程占用A时，而得不到资源B的时候，使用wait()方法，使该线程等待，从而释放资源A，当另一线程释放资源B的时候，使用notify()方法，告诉该线程，资源B已经可以使用了，从而让该线程继续执行。
