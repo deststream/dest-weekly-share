@@ -339,4 +339,104 @@ public class Manipulation {
 > 泛型正如其名称所暗示的：它是一种方法，通过它可以编写出更“泛化”的代码，这些代码对于它们能够作用的类型有更少的限制，因此单个的代码段能够应用到更多的类型上。
 
 
+## 三、iOS app生命周期
+### 一、os app有5种状态
+```
+1、Not running未运行：app没启动或被迫终止。
 
+2、Inactive未激活：当前应用正在前台运行，但是并不接收事件（当前或许正在执行其它代码）。一般每当应用要从一个状态切换到另一个不同的状态时，中途过渡会短暂停留在此状态。唯一在此状态停留时间比较长的情况是：当用户锁屏时，或者系统提示用户去响应某些（诸如电话来电、有未读短信等）事件的时候。
+
+3、Active激活：当前应用正在前台运行，并且接收事件。这是应用正在前台运行时所处的正常状态。
+
+4、Backgroud后台：程序在后台而且能执行代码，大多数程序进入这个状态后会在在这个状态上停留一会。时间到之后会进入挂起状态(Suspended)。经过特殊的请求后可以长期处于Backgroud状态。
+
+5、Suspended挂起：程序在后台不能执行代码。系统会自动把程序变成这个状态而且不会发出通知。当挂起时，程序还是停留在内存中的，当系统内存低时，系统就把挂起的程序清除掉，为前台程序提供更多的内存。
+
+```
+### 二、app5种状态之间的转换
+```
+根据苹果官网对这五种状态的解释，如下图
+```
+![image](https://github.com/deststream/dest-weekly-share/blob/master/lifeCycle.png)
+
+需要注意的一点是：
+```
+对于从Not running状态直接进入到background状态的应用，在启动进入到background状态时，如果应用有界面，系统仍然会加载用户界面文件，只是不会显示在应用的window上面。
+为了在程序中确定你的程序是进入到了foreground还是background，你可以在application:didFinishLaunchingWithOptions:   方法中检测UIApplication类对象的applicationState属性，如果应用进入到了foreground，则属性值为UIApplicationStateInactive，如果进入到了background，则为UIApplicationStateBackground。
+```
+检测示例代码：
+```
+UIApplicationState state = [UIApplication sharedApplication].applicationState;
+return (state==UIApplicationStateActive || state==UIApplicationStateInactive );
+```
+### 三、app生命周期执行流程
+
+具体执行流程
+1.程序入口
+```
+进入main函数，设置AppDelegate称为函数的代理
+```
+2.程序完成加载
+```
+[AppDelegate application:didFinishLaunchingWithOptions:]
+```
+3.创建window窗口
+
+4.程序被激活
+```
+[AppDelegate applicationDidBecomeActive:]
+```
+5.当点击command+H时(针对模拟器,手机是当点击home键)
+```
+[AppDelegate applicationDidBecomeActive:]
+```
+程序取消激活状态
+```
+[AppDelegate applicationWillResignActive:];
+```
+程序进入后台
+```
+[AppDelegate applicationDidEnterBackground:];
+```
+6.点击进入工程
+程序进入前台
+```
+[AppDelegate applicationWillEnterForeground:]
+```
+程序被激活
+```
+[AppDelegate applicationDidBecomeActive:];
+```
+### 四、app生命周期主要函数介绍
+1.viewDidLoad
+```
+当loadView将view载入内存中，会进一步调用viewDidLoad方法来进行进一步设置。此时，视图层次已经放到内存中，通常，我们对于各种初始化数据的载入，初始设定、修改约束、移除视图等很多操作都可以这个方法中实现。
+视图层次(view hierachy):因为每个视图都有自己的子视图，这个视图层次其实也可以理解为一颗树状的数据结构。而树的根节点，也就是根视图(root view),在UIViewController中以view属性。它可以看做是其他所有子视图的容器，也就是根节点。
+```
+2.viewWillAppear
+```
+系统在载入所有的数据后，将会在屏幕上显示视图，这时会先调用这个方法，通常我们会在这个方法对即将显示的视图做进一步的设置。比如，设置设备不同方向时该如何显示；设置状态栏方向、设置视图显示样式等。
+另一方面，当APP有多个视图时，上下级视图切换是也会调用这个方法，如果在调入视图时，需要对数据做更新，就只能在这个方法内实现。
+```
+3.viewWillLayoutSubviews
+```
+view 即将布局其Subviews。 比如view的bounds改变了(例如:状态栏从不显示到显示,视图方向变化)，要调整Subviews的位置，在调整之前要做的工作可以放在该方法中实现
+```
+4.viewDidLayoutSubviews
+```
+view已经布局其Subviews，这里可以放置调整完成之后需要做的工作。
+```
+5.viewDidAppear
+```
+在view被添加到视图层级中以及多视图，上下级视图切换时调用这个方法，在这里可以对正在显示的视图做进一步的设置。
+```
+6.viewWillDisappear
+```
+在视图切换时，当前视图在即将被移除、或被覆盖是，会调用该方法，此时还没有调用removeFromSuperview。
+```
+7.viewDidDisappear
+```
+view已经消失或被覆盖，此时已经调用removeFromSuperView;
+```
+### 更详细内容可参考
+[The App Life Cycle](https://developer.apple.com/library/archive/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/TheAppLifeCycle/TheAppLifeCycle.html)
