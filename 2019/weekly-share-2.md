@@ -407,7 +407,7 @@ return (state==UIApplicationStateActive || state==UIApplicationStateInactive );
 ```
 [AppDelegate applicationDidBecomeActive:];
 ```
-### 四、app生命周期主要函数介绍
+### 四、app页面生命周期函数介绍
 1.viewDidLoad
 ```
 当loadView将view载入内存中，会进一步调用viewDidLoad方法来进行进一步设置。此时，视图层次已经放到内存中，通常，我们对于各种初始化数据的载入，初始设定、修改约束、移除视图等很多操作都可以这个方法中实现。
